@@ -62,7 +62,7 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 <label class="t">Como pretende pagar?</label>
 <div class="op" id="opPag">
 <label><input type="radio" name="pag" value="À vista" required><span>À vista</span></label>
-<label><input type="radio" name="pag" value="Financiado"><span>Financiado</span></label>
+<label id="opFin"><input type="radio" name="pag" value="Financiado"><span>Financiado</span></label>
 <label><input type="radio" name="pag" value="Com carro na troca"><span>Com troca</span></label>
 </div>
 <label class="t">Quando pode ir à loja?</label>
@@ -90,20 +90,20 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 const WHATSAPP = "5567996079708"; // (67) 99607-9708 - decisão do Marcio em 02/11
 const REGISTRO_URL = "https://script.google.com/macros/s/AKfycbyNeiXTwpvu3Vr0J9rypic42Shc8N5NuuYLmJyAdRwDagjmDVYCPOwLKfdpbp80wWHEww/exec";  // Apps Script (planilha Leads CredCars)
 const CARROS = [
-  { id:"c1", nome:"Fiat Palio Fire 1.0 · 2008 · 4 portas", detalhe:"190 mil km · Flex · Manual · todo original · revisado · pneus bons", preco:"R$ 25.900", foto:"carros/c1.jpg" }
+  { id:"c1", nome:"Fiat Palio Fire 1.0 · 2008 · 4 portas", detalhe:"190 mil km · Flex · Manual · todo original · revisado · pneus bons", preco:"R$ 25.900", pagamento:"Sem financiamento: à vista ou com troca", semFinanciamento:true, foto:"carros/c1.jpg" }
 ];
 /* ======================================== */
 const grade=document.getElementById("grade"),fundo=document.getElementById("fundo"),f=document.getElementById("f");
 let atual=null;
 const pCarro=new URLSearchParams(location.search).get("carro");
-function cartao(c){return `<div class="carro"><img src="${c.foto}" alt="${c.nome}"><div><h2>${c.nome}</h2><small>${c.detalhe||""}</small><div class="preco">${c.preco}</div><button class="quero" data-id="${c.id}">Quero ver este carro</button></div></div>`}
+function cartao(c){return `<div class="carro"><img src="${c.foto}" alt="${c.nome}"><div><h2>${c.nome}</h2><small>${c.detalhe||""}</small><div class="preco">${c.preco}</div>${c.pagamento?`<small>${c.pagamento}</small>`:""}<button class="quero" data-id="${c.id}">Quero ver este carro</button></div></div>`}
 function render(){
   if(!CARROS.length){grade.innerHTML='<div class="vazio">Estoque sendo atualizado. Volte em breve.</div>';return}
   const um=pCarro?CARROS.find(c=>c.id===pCarro):null;
   if(um){grade.innerHTML=cartao(um)+'<div class="vazio"><a href="'+location.pathname+'" style="color:#fff">Ver todos os carros</a></div>';return}
   grade.innerHTML=CARROS.map(cartao).join("");
 }
-grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;atual=CARROS.find(c=>c.id===b.dataset.id);document.getElementById("tituloCarro").textContent=atual.nome;fundo.classList.add("on")});
+grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;atual=CARROS.find(c=>c.id===b.dataset.id);document.getElementById("tituloCarro").textContent=atual.nome;document.getElementById("opFin").style.display=atual.semFinanciamento?"none":"";fundo.classList.add("on")});
 document.getElementById("cancelar").onclick=()=>fundo.classList.remove("on");
 function codigo(){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return "CC-"+s}
 f.addEventListener("submit",e=>{
