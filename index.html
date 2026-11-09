@@ -56,22 +56,10 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 <div id="fundo">
 <form id="f">
 <h3 id="tituloCarro"></h3>
-<p class="sub">São 3 perguntas rápidas. Depois você continua a conversa no WhatsApp.</p>
+<p class="sub">Só o seu primeiro nome. Depois você continua a conversa no WhatsApp.</p>
 <label class="t" for="nome">Seu primeiro nome</label>
 <input type="text" id="nome" maxlength="30" autocomplete="given-name" required>
-<label class="t">Como pretende pagar?</label>
-<div class="op" id="opPag">
-<label><input type="radio" name="pag" value="À vista" required><span>À vista</span></label>
-<label id="opFin"><input type="radio" name="pag" value="Financiado"><span>Financiado</span></label>
-<label><input type="radio" name="pag" value="Com carro na troca"><span>Com troca</span></label>
-</div>
-<label class="t">Quando pode ir à loja?</label>
-<div class="op">
-<label><input type="radio" name="qd" value="Hoje" required><span>Hoje</span></label>
-<label><input type="radio" name="qd" value="Amanhã"><span>Amanhã</span></label>
-<label><input type="radio" name="qd" value="Esta semana"><span>Esta semana</span></label>
-</div>
-<p class="aviso"><label><input type="checkbox" id="ok" required> Aceito receber contato pelo WhatsApp sobre este carro.</label><br><b>Não envie CPF, RG nem documentos por aqui.</b></p>
+<p class="aviso">Ao continuar, você abre uma conversa no WhatsApp da loja.<br><b>Não envie CPF, RG nem documentos por aqui.</b></p>
 <button class="enviar" type="submit">Continuar no WhatsApp</button>
 <button class="cancelar" type="button" id="cancelar">Voltar</button>
 </form>
@@ -81,9 +69,9 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 <details><summary>Quais documentos pedem?</summary><p>Em geral, para financiar, o banco pede documento com foto, comprovante de renda e comprovante de residência. A loja confirma a lista certa com você na visita. Não envie documentos por aqui nem pelo WhatsApp.</p></details>
 <details><summary>Preciso de entrada?</summary><p>Em geral, os bancos pedem uma entrada, e quanto maior ela for, mais fácil costuma ser. Quem decide a aprovação, o valor e as parcelas é o banco, depois da análise. Não prometemos aprovação.</p></details>
 <details><summary>Tem restrição no meu nome. E agora?</summary><p>Com restrição no nome, os bancos costumam negar o financiamento. Quitando ou renegociando a dívida, o credor tem prazo para pedir a retirada do nome do cadastro, e depois dá para tentar de novo. Para pagamento à vista, a restrição não impede a compra.</p></details>
-<details><summary>Como é a visita?</summary><p>Reservada e com hora marcada, sem fila e sem compromisso. Você escolhe o carro, responde 3 perguntas e continua a conversa no WhatsApp.</p></details>
+<details><summary>Como é a visita?</summary><p>Reservada e com hora marcada, sem fila e sem compromisso. Você escolhe o carro, diz o seu primeiro nome e continua a conversa no WhatsApp.</p></details>
 </section>
-<p class="priv">Suas respostas são usadas só para o seu atendimento e para agendar a visita, por Marcio dos Santos Veiga Ltda (CNPJ 33.763.659/0001-59), e são apagadas em até 90 dias. Não pedimos CPF nem documentos.</p>
+<p class="priv">Seu nome é usado só para o seu atendimento e para agendar a visita, por Marcio dos Santos Veiga Ltda (CNPJ 33.763.659/0001-59), e é apagado em até 90 dias. Não pedimos CPF nem documentos.</p>
 <footer>CredCars &middot; Chapadão do Sul &ndash; MS</footer>
 <script>
 /* ===== CONFIGURAR ANTES DE PUBLICAR ===== */
@@ -103,17 +91,20 @@ function render(){
   if(um){grade.innerHTML=cartao(um)+'<div class="vazio"><a href="'+location.pathname+'" style="color:#fff">Ver todos os carros</a></div>';return}
   grade.innerHTML=CARROS.map(cartao).join("");
 }
-grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;atual=CARROS.find(c=>c.id===b.dataset.id);document.getElementById("tituloCarro").textContent=atual.nome;document.getElementById("opFin").style.display=atual.semFinanciamento?"none":"";fundo.classList.add("on")});
+grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;atual=CARROS.find(c=>c.id===b.dataset.id);document.getElementById("tituloCarro").textContent=atual.nome;fundo.classList.add("on")});
 document.getElementById("cancelar").onclick=()=>fundo.classList.remove("on");
 function codigo(){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return "CC-"+s}
 f.addEventListener("submit",e=>{
   e.preventDefault();
   if(!WHATSAPP){alert("Número de WhatsApp ainda não configurado.");return}
   const p=new URLSearchParams(location.search),cod=codigo();
-  const d={codigo:cod,nome:document.getElementById("nome").value.trim(),carro:atual.nome,pagamento:f.pag.value,quando:f.qd.value,
+  const d={codigo:cod,nome:document.getElementById("nome").value.trim(),carro:atual.nome,pagamento:"",quando:"",
     utm_source:p.get("utm_source")||"",utm_campaign:p.get("utm_campaign")||"",utm_content:p.get("utm_content")||pCarro||"",enviado_em:new Date().toISOString()};
-  if(REGISTRO_URL){try{fetch(REGISTRO_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(d)})}catch(x){}}
-  const msg=`Olá! Vi o ${d.carro} no CredCars.\nMeu código: ${cod}\nPagamento: ${d.pagamento}\nPosso ir: ${d.quando}\nMeu nome: ${d.nome}`;
+  /* sendBeacon entrega o registro mesmo quando a página sai para o WhatsApp antes da resposta (celular lento) */
+  if(REGISTRO_URL){const corpo=JSON.stringify(d);let foi=false;
+    try{foi=!!(navigator.sendBeacon&&navigator.sendBeacon(REGISTRO_URL,corpo))}catch(x){}
+    if(!foi){try{fetch(REGISTRO_URL,{method:"POST",mode:"no-cors",keepalive:true,body:corpo})}catch(x){}}}
+  const msg=`Olá! Vi o ${d.carro} no CredCars.\nMeu código: ${cod}\nMeu nome: ${d.nome}`;
   setTimeout(()=>{location.href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg)},350);
 });
 render();
