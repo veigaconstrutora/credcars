@@ -37,6 +37,15 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 #barra{position:fixed;left:0;right:0;bottom:0;background:#151515;border-top:1px solid #333;padding:10px 14px;display:none}
 #barra.on{display:block}
 #barra button{width:100%;padding:14px;background:#d62828;color:#fff;font-weight:700;font-size:17px}
+.numero{margin:10px 0 0;text-align:center;color:#e2e2e2;font-size:15px}
+.numero b{color:#fff}
+.copiar{background:#2f2f2f;color:#fff;border:1px solid #555;padding:6px 12px;font-size:14px;margin-left:6px}
+#volta{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10;align-items:center;justify-content:center;padding:16px}
+#volta.on{display:flex}
+#volta>div{background:#222;border:2px solid #d62828;border-radius:14px;max-width:420px;width:100%;padding:20px;text-align:center}
+#volta h3{margin:0 0 8px;font-size:21px}
+#volta p{margin:0 0 14px;color:#e2e2e2;font-size:16px}
+#volta .fechar{background:none;color:#bdbdbd;text-decoration:underline;margin-top:12px;font-size:14px}
 </style>
 </head>
 <body>
@@ -50,6 +59,13 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 <p class="priv">Seu contato é usado só para o seu atendimento e para agendar a visita, por Marcio dos Santos Veiga Ltda (CNPJ 33.763.659/0001-59), e é apagado em até 90 dias. Não pedimos CPF nem documentos.</p>
 <footer>CredCars &middot; Chapadão do Sul &ndash; MS</footer>
 <div id="barra"><button type="button" id="barraBotao">Chamar no WhatsApp</button></div>
+<div id="volta" role="dialog" aria-modal="true"><div>
+<h3>A mensagem ainda não foi enviada</h3>
+<p>No WhatsApp, falta tocar em <b>enviar</b> (a setinha verde). Toque abaixo para abrir de novo.</p>
+<button type="button" class="quero" id="voltaBotao">Abrir o WhatsApp de novo</button>
+<p class="numero">Não abriu? Chame no <b>(67) 99607-9708</b> <button type="button" class="copiar">Copiar número</button></p>
+<button type="button" class="fechar" id="voltaFechar">Já enviei</button>
+</div></div>
 <script>
 /* ===== CONFIGURAR ANTES DE PUBLICAR ===== */
 const WHATSAPP = "5567996079708"; // (67) 99607-9708 - decisão do Marcio em 02/11
@@ -84,7 +100,8 @@ function cartao(c){
     `<h2>${c.nome}</h2><small>${c.detalhe||""}</small><div class="preco">${c.preco}</div>`+
     `${c.pagamento?`<small>${c.pagamento}</small>`:""}`+
     `${c.selos?`<div class="selos">${c.selos.map(s=>`<span>${s}</span>`).join("")}</div>`:""}`+
-    `<button class="quero" data-id="${c.id}">Chamar no WhatsApp</button></div></div>`}
+    `<button class="quero" data-id="${c.id}">Chamar no WhatsApp</button>`+
+    `<p class="numero">WhatsApp <b>(67) 99607-9708</b> <button type="button" class="copiar">Copiar número</button></p></div></div>`}
 function faq(lista){return '<h2>Perguntas</h2>'+lista.map(([p,r])=>`<details><summary>${p}</summary><p>${r}</p></details>`).join("")}
 function render(){
   if(!CARROS.length){grade.innerHTML='<div class="vazio">Estoque sendo atualizado. Volte em breve.</div>';return}
@@ -95,19 +112,48 @@ function render(){
   if(um){const b=document.getElementById("barra");b.classList.add("on");document.getElementById("barraBotao").onclick=()=>chamar(um)}
 }
 function codigo(){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return "CC-"+s}
-let saindo=false;
+let saindo=false,saiuEm=0,ultimo=null,codSessao=null;
+/* mesmo código na sessão: quem volta e toca de novo não vira um segundo registro */
+function guardar(k,v){try{sessionStorage.setItem(k,v)}catch(x){}}
+function ler(k){try{return sessionStorage.getItem(k)}catch(x){return null}}
 function chamar(c){
   if(saindo)return; saindo=true;
-  const p=new URLSearchParams(location.search),cod=codigo();
+  const p=new URLSearchParams(location.search);
+  const jaTinha=ler("cc_cod_"+c.id);
+  const cod=jaTinha||codigo();
+  ultimo=c; saiuEm=Date.now();
+  if(jaTinha){abrirWhats(c,cod);return}
+  guardar("cc_cod_"+c.id,cod);
   const d={codigo:cod,nome:"(direto no WhatsApp)",carro:c.nome,pagamento:"",quando:"",
     utm_source:p.get("utm_source")||"",utm_campaign:p.get("utm_campaign")||"",utm_content:p.get("utm_content")||pCarro||"",enviado_em:new Date().toISOString()};
   /* sendBeacon entrega o registro mesmo quando a página sai para o WhatsApp antes da resposta (celular lento) */
   if(REGISTRO_URL){const corpo=JSON.stringify(d);let foi=false;
     try{foi=!!(navigator.sendBeacon&&navigator.sendBeacon(REGISTRO_URL,corpo))}catch(x){}
     if(!foi){try{fetch(REGISTRO_URL,{method:"POST",mode:"no-cors",keepalive:true,body:corpo})}catch(x){}}}
+  abrirWhats(c,cod);
+}
+function abrirWhats(c,cod){
   const msg=`Olá! Vi o ${c.curto||c.nome} no CredCars e quero ver o carro.\nMeu código: ${cod}`;
   setTimeout(()=>{location.href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);saindo=false},350);
 }
+/* quem volta para a página depois de tocar no botão provavelmente não enviou: mostra o aviso */
+const volta=document.getElementById("volta");
+function talvezAvisar(){
+  if(!ultimo||!saiuEm)return;
+  const passou=Date.now()-saiuEm;
+  if(passou>1500&&passou<30*60*1000)volta.classList.add("on");
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")talvezAvisar()});
+window.addEventListener("pageshow",e=>{if(e.persisted)talvezAvisar()});
+document.getElementById("voltaBotao").onclick=()=>{volta.classList.remove("on");if(ultimo)chamar(ultimo)};
+document.getElementById("voltaFechar").onclick=()=>{volta.classList.remove("on");saiuEm=0};
+function copiar(b){
+  const t="67996079708";
+  const ok=()=>{const o=b.textContent;b.textContent="Copiado!";setTimeout(()=>b.textContent=o,2000)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,()=>prompt("Copie o número:",t))}
+  else prompt("Copie o número:",t);
+}
+document.addEventListener("click",e=>{const b=e.target.closest(".copiar");if(b)copiar(b)});
 grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;chamar(CARROS.find(c=>c.id===b.dataset.id))});
 render();
 </script>
