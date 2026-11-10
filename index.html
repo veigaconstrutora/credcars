@@ -52,7 +52,7 @@ footer{text-align:center;color:#999;font-size:12px;padding:18px}
 <header>
 <img src="logo.png" alt="CredCars">
 <h1>Carros em Chapadão do Sul</h1>
-<p>Carro revisado, com troca. Chame no WhatsApp e marque para ver hoje, com hora marcada.</p>
+<p>Chame no WhatsApp e marque para ver hoje, com hora marcada.</p>
 </header>
 <main class="grade" id="grade"></main>
 <section class="info" id="info"></section>
@@ -76,7 +76,23 @@ const CARROS = [
     preco:"R$ 23.900", selos:["Aceita troca","Aceita proposta","Ver hoje"],
     pagamento:"Aceita carro ou moto na troca", semFinanciamento:true,
     fotos:["carros/c1/01-frente-lateral.jpg","carros/c1/02-frente.jpg","carros/c1/03-traseira-borrada.jpg",
-           "carros/c1/04-interior-frente.jpg","carros/c1/05-painel.jpg","carros/c1/06-banco-traseiro.jpg"] }
+           "carros/c1/04-interior-frente.jpg","carros/c1/05-painel.jpg","carros/c1/06-banco-traseiro.jpg"] },
+  { id:"c2", nome:"Chevrolet Celta Spirit 1.0 · 2010 · 2 portas", curto:"Celta 2010",
+    detalhe:"210 mil km · Flex · Manual · pneus novos · interno bem cuidado",
+    preco:"R$ 21.500", selos:["Abaixo da FIPE","Pneus novos","Ver hoje"],
+    pagamento:"R$ 3.394 abaixo da tabela FIPE (R$ 24.894)",
+    /* troca e financiamento ainda não confirmados pelo dono: perguntas neutras */
+    faq:[["Aceita troca? Financia?","A loja confirma com você pelo WhatsApp as formas de pagamento para este carro."],
+         ["Por que está abaixo da FIPE?","A FIPE de novembro/2026 para o Celta Spirit 1.0 2010 2 portas é R$ 24.894. Este tem 210 mil km, e o preço já considera isso."],
+         ["Dá para ver hoje?","Sim, com hora marcada pelo WhatsApp. Sem fila e sem compromisso."],
+         ["Preciso mandar documento?","Não. Não envie CPF, RG nem documentos pelo WhatsApp. O que precisar, a loja vê com você na visita."]],
+    fotos:["carros/c2/01-frente-lateral.jpg","carros/c2/02-frente.jpg","carros/c2/03-lateral-borrada.jpg",
+           "carros/c2/05-traseira.jpg","carros/c2/06-interior.jpg","carros/c2/07-painel.jpg",
+           "carros/c2/08-motor.jpg","carros/c2/09-pneu.jpg"] }
+];
+const FAQ_GERAL = [
+  ["Dá para ver hoje?","Sim, com hora marcada pelo WhatsApp. Sem fila e sem compromisso."],
+  ["Preciso mandar documento?","Não. Não envie CPF, RG nem documentos pelo WhatsApp. O que precisar, a loja vê com você na visita."]
 ];
 /* ======================================== */
 const FAQ_SEM_FIN = [
@@ -108,7 +124,9 @@ function render(){
   const um=pCarro?CARROS.find(c=>c.id===pCarro):null;
   const lista=um?[um]:CARROS;
   grade.innerHTML=lista.map(cartao).join("")+(um&&CARROS.length>1?`<div class="vazio"><a href="${location.pathname}">Ver todos os carros</a></div>`:"");
-  document.getElementById("info").innerHTML=faq(lista.every(c=>c.semFinanciamento)?FAQ_SEM_FIN:FAQ_COM_FIN);
+  const perguntas=um?(um.faq||(um.semFinanciamento?FAQ_SEM_FIN:FAQ_COM_FIN))
+                    :(lista.every(c=>c.semFinanciamento)?FAQ_SEM_FIN:FAQ_GERAL);
+  document.getElementById("info").innerHTML=faq(perguntas);
   if(um){const b=document.getElementById("barra");b.classList.add("on");document.getElementById("barraBotao").onclick=()=>chamar(um)}
 }
 function codigo(){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return "CC-"+s}
