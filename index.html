@@ -121,7 +121,7 @@ function chamar(c){
   const p=new URLSearchParams(location.search);
   const jaTinha=ler("cc_cod_"+c.id);
   const cod=jaTinha||codigo();
-  ultimo=c; saiuEm=Date.now();
+  ultimo=c; saiuEm=Date.now(); guardar("cc_saiu",c.id+"|"+saiuEm);
   if(jaTinha){abrirWhats(c,cod);return}
   guardar("cc_cod_"+c.id,cod);
   const d={codigo:cod,nome:"(direto no WhatsApp)",carro:c.nome,pagamento:"",quando:"",
@@ -146,7 +146,10 @@ function talvezAvisar(){
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")talvezAvisar()});
 window.addEventListener("pageshow",e=>{if(e.persisted)talvezAvisar()});
 document.getElementById("voltaBotao").onclick=()=>{volta.classList.remove("on");if(ultimo)chamar(ultimo)};
-document.getElementById("voltaFechar").onclick=()=>{volta.classList.remove("on");saiuEm=0};
+document.getElementById("voltaFechar").onclick=()=>{volta.classList.remove("on");saiuEm=0;guardar("cc_saiu","")};
+/* quem volta pelo botão "voltar" recarrega a página e perde a memória: lê o que ficou guardado na sessão */
+(function(){const s=ler("cc_saiu");if(!s)return;const [id,t]=s.split("|");const c=CARROS.find(x=>x.id===id);
+  if(c&&+t){ultimo=c;saiuEm=+t;talvezAvisar()}})();
 function copiar(b){
   const t="67996079708";
   const ok=()=>{const o=b.textContent;b.textContent="Copiado!";setTimeout(()=>b.textContent=o,2000)};
