@@ -6,107 +6,109 @@
 <title>CredCars - Carros em Chapadão do Sul</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#151515;color:#fff;line-height:1.4}
-header{text-align:center;padding:26px 16px 10px}
-header img{width:92px;height:92px;border-radius:50%}
-h1{font-size:24px;margin:10px 0 4px}
-header p{margin:0 auto;max-width:460px;color:#d8d8d8}
-.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding:18px;max-width:1000px;margin:0 auto}
+body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#151515;color:#fff;line-height:1.4;padding-bottom:84px}
+header{text-align:center;padding:22px 16px 6px}
+header img{width:80px;height:80px;border-radius:50%}
+h1{font-size:23px;margin:8px 0 4px}
+header p{margin:0 auto;max-width:460px;color:#e2e2e2;font-size:15px}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;padding:16px;max-width:1000px;margin:0 auto}
 .carro{background:#222;border-radius:12px;overflow:hidden;border:1px solid #333}
-.carro img{width:100%;height:170px;object-fit:cover;background:#2c2c2c}
-.carro div{padding:12px}
-.carro h2{font-size:18px;margin:0 0 2px}
-.carro small{color:#bdbdbd}
-.preco{font-size:22px;font-weight:700;color:#fff;margin:6px 0}
+.galeria{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.galeria::-webkit-scrollbar{display:none}
+.galeria img{flex:0 0 100%;width:100%;height:240px;object-fit:cover;scroll-snap-align:start;background:#2c2c2c}
+.dica{margin:0;padding:6px 12px 0;color:#bdbdbd;font-size:13px}
+.carro>div{padding:12px}
+.carro h2{font-size:19px;margin:0 0 2px}
+.carro small{color:#c9c9c9;display:block}
+.preco{font-size:26px;font-weight:700;color:#fff;margin:8px 0 2px}
+.selos{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
+.selos span{background:#2f2f2f;border:1px solid #444;border-radius:20px;padding:4px 10px;font-size:13px}
 button{font:inherit;cursor:pointer;border:0;border-radius:8px}
-.quero{width:100%;padding:12px;background:#d62828;color:#fff;font-weight:700;font-size:16px}
-.vazio{grid-column:1/-1;text-align:center;color:#bdbdbd;padding:30px}
-#fundo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:14px;z-index:5}
-#fundo.on{display:flex}
-form{background:#fff;color:#111;border-radius:14px;padding:20px;width:100%;max-width:400px;max-height:92vh;overflow:auto}
-form h3{margin:0 0 4px;font-size:19px}
-.sub{margin:0 0 12px;color:#444;font-size:14px}
-label.t{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
-input[type=text]{width:100%;padding:11px;border:1px solid #999;border-radius:8px;font:inherit}
-.op{display:flex;flex-wrap:wrap;gap:8px}
-.op label{flex:1 1 auto;border:2px solid #bbb;border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:14px}
-.op input{display:none}
-.op input:checked+span{font-weight:700}
-.op label:has(input:checked){border-color:#d62828;background:#fbe9e9}
-.aviso{font-size:12px;color:#444;margin:12px 0}
-.aviso b{color:#111}
-.enviar{width:100%;padding:13px;background:#d62828;color:#fff;font-weight:700;font-size:16px;margin-top:6px}
-.cancelar{width:100%;padding:10px;background:none;color:#333;margin-top:4px}
+.quero{width:100%;padding:14px;background:#d62828;color:#fff;font-weight:700;font-size:17px;margin-top:6px}
+.vazio{grid-column:1/-1;text-align:center;color:#bdbdbd;padding:20px}
+.vazio a{color:#fff}
 details{background:#222;border:1px solid #333;border-radius:10px;margin:8px 0;padding:12px 14px}
 summary{cursor:pointer;font-weight:600}
-details p{margin:8px 0 0;color:#d8d8d8;font-size:15px}
-.info{max-width:700px;margin:6px auto 0;padding:0 18px}
+details p{margin:8px 0 0;color:#e2e2e2;font-size:15px}
+.info{max-width:700px;margin:6px auto 0;padding:0 16px}
 .info h2{font-size:19px;margin:16px 0 6px}
 .priv{max-width:700px;margin:0 auto;padding:6px 18px 0;color:#9a9a9a;font-size:12px;text-align:center}
 footer{text-align:center;color:#999;font-size:12px;padding:18px}
+#barra{position:fixed;left:0;right:0;bottom:0;background:#151515;border-top:1px solid #333;padding:10px 14px;display:none}
+#barra.on{display:block}
+#barra button{width:100%;padding:14px;background:#d62828;color:#fff;font-weight:700;font-size:17px}
 </style>
 </head>
 <body>
 <header>
 <img src="logo.png" alt="CredCars">
 <h1>Carros em Chapadão do Sul</h1>
-<p>Veja o preço, a entrada e os documentos antes de falar com alguém. Só chame se gostar.</p>
+<p>Carro revisado, com troca. Chame no WhatsApp e marque para ver hoje, com hora marcada.</p>
 </header>
 <main class="grade" id="grade"></main>
-<div id="fundo">
-<form id="f">
-<h3 id="tituloCarro"></h3>
-<p class="sub">Só o seu primeiro nome. Depois você continua a conversa no WhatsApp.</p>
-<label class="t" for="nome">Seu primeiro nome</label>
-<input type="text" id="nome" maxlength="30" autocomplete="given-name" required>
-<p class="aviso">Ao continuar, você abre uma conversa no WhatsApp da loja.<br><b>Não envie CPF, RG nem documentos por aqui.</b></p>
-<button class="enviar" type="submit">Continuar no WhatsApp</button>
-<button class="cancelar" type="button" id="cancelar">Voltar</button>
-</form>
-</div>
-<section class="info">
-<h2>Como funciona a compra</h2>
-<details><summary>Quais documentos pedem?</summary><p>Em geral, para financiar, o banco pede documento com foto, comprovante de renda e comprovante de residência. A loja confirma a lista certa com você na visita. Não envie documentos por aqui nem pelo WhatsApp.</p></details>
-<details><summary>Preciso de entrada?</summary><p>Em geral, os bancos pedem uma entrada, e quanto maior ela for, mais fácil costuma ser. Quem decide a aprovação, o valor e as parcelas é o banco, depois da análise. Não prometemos aprovação.</p></details>
-<details><summary>Tem restrição no meu nome. E agora?</summary><p>Com restrição no nome, os bancos costumam negar o financiamento. Quitando ou renegociando a dívida, o credor tem prazo para pedir a retirada do nome do cadastro, e depois dá para tentar de novo. Para pagamento à vista, a restrição não impede a compra.</p></details>
-<details><summary>Como é a visita?</summary><p>Reservada e com hora marcada, sem fila e sem compromisso. Você escolhe o carro, diz o seu primeiro nome e continua a conversa no WhatsApp.</p></details>
-</section>
-<p class="priv">Seu nome é usado só para o seu atendimento e para agendar a visita, por Marcio dos Santos Veiga Ltda (CNPJ 33.763.659/0001-59), e é apagado em até 90 dias. Não pedimos CPF nem documentos.</p>
+<section class="info" id="info"></section>
+<p class="priv">Seu contato é usado só para o seu atendimento e para agendar a visita, por Marcio dos Santos Veiga Ltda (CNPJ 33.763.659/0001-59), e é apagado em até 90 dias. Não pedimos CPF nem documentos.</p>
 <footer>CredCars &middot; Chapadão do Sul &ndash; MS</footer>
+<div id="barra"><button type="button" id="barraBotao">Chamar no WhatsApp</button></div>
 <script>
 /* ===== CONFIGURAR ANTES DE PUBLICAR ===== */
 const WHATSAPP = "5567996079708"; // (67) 99607-9708 - decisão do Marcio em 02/11
 const REGISTRO_URL = "https://script.google.com/macros/s/AKfycbyNeiXTwpvu3Vr0J9rypic42Shc8N5NuuYLmJyAdRwDagjmDVYCPOwLKfdpbp80wWHEww/exec";  // Apps Script (planilha Leads CredCars)
 const CARROS = [
-  { id:"c1", nome:"Fiat Palio Fire 1.0 · 2008 · 4 portas", detalhe:"190 mil km · Flex · Manual · todo original · revisado · pneus bons", preco:"R$ 25.900", pagamento:"Sem financiamento: à vista ou com troca", semFinanciamento:true, foto:"carros/c1.jpg" }
+  { id:"c1", nome:"Fiat Palio Fire 1.0 · 2008 · 4 portas", curto:"Palio 2008",
+    detalhe:"190 mil km · Flex · Manual · todo original · revisado · pneus bons",
+    preco:"R$ 23.900", selos:["Aceita troca","Aceita proposta","Ver hoje"],
+    pagamento:"Aceita carro ou moto na troca", semFinanciamento:true,
+    fotos:["carros/c1/01-frente-lateral.jpg","carros/c1/02-frente.jpg","carros/c1/03-traseira-borrada.jpg",
+           "carros/c1/04-interior-frente.jpg","carros/c1/05-painel.jpg","carros/c1/06-banco-traseiro.jpg"] }
 ];
 /* ======================================== */
-const grade=document.getElementById("grade"),fundo=document.getElementById("fundo"),f=document.getElementById("f");
-let atual=null;
+const FAQ_SEM_FIN = [
+  ["Aceita troca?","Sim. Carro ou moto entram como parte do pagamento. A avaliação é feita na visita."],
+  ["Tem financiamento?","Os bancos costumam não financiar carro com essa idade. Ele aceita carro ou moto na troca, e a forma de pagamento você combina com a loja pelo WhatsApp."],
+  ["Dá para ver hoje?","Sim, com hora marcada pelo WhatsApp. Sem fila e sem compromisso."],
+  ["Preciso mandar documento?","Não. Não envie CPF, RG nem documentos pelo WhatsApp. O que precisar, a loja vê com você na visita."]
+];
+const FAQ_COM_FIN = [
+  ["Quais documentos pedem?","Em geral, para financiar, o banco pede documento com foto, comprovante de renda e comprovante de residência. A loja confirma a lista certa com você na visita. Não envie documentos pelo WhatsApp."],
+  ["Preciso de entrada?","Em geral, os bancos pedem uma entrada. Quem decide a aprovação, o valor e as parcelas é o banco, depois da análise. Não prometemos aprovação."],
+  ["Aceita troca?","Sim. Carro ou moto entram como parte do pagamento. A avaliação é feita na visita."],
+  ["Dá para ver hoje?","Sim, com hora marcada pelo WhatsApp. Sem fila e sem compromisso."]
+];
+const grade=document.getElementById("grade");
 const pCarro=new URLSearchParams(location.search).get("carro");
-function cartao(c){return `<div class="carro"><img src="${c.foto}" alt="${c.nome}"><div><h2>${c.nome}</h2><small>${c.detalhe||""}</small><div class="preco">${c.preco}</div>${c.pagamento?`<small>${c.pagamento}</small>`:""}<button class="quero" data-id="${c.id}">Quero ver este carro</button></div></div>`}
+function cartao(c){
+  const fotos=(c.fotos||[c.foto]).map((f,i)=>`<img src="${f}" alt="${c.nome}, foto ${i+1}" ${i?'loading="lazy"':""}>`).join("");
+  const n=(c.fotos||[]).length;
+  return `<div class="carro"><div class="galeria">${fotos}</div>${n>1?`<p class="dica">Deslize para o lado: ${n} fotos</p>`:""}<div>`+
+    `<h2>${c.nome}</h2><small>${c.detalhe||""}</small><div class="preco">${c.preco}</div>`+
+    `${c.pagamento?`<small>${c.pagamento}</small>`:""}`+
+    `${c.selos?`<div class="selos">${c.selos.map(s=>`<span>${s}</span>`).join("")}</div>`:""}`+
+    `<button class="quero" data-id="${c.id}">Chamar no WhatsApp</button></div></div>`}
+function faq(lista){return '<h2>Perguntas</h2>'+lista.map(([p,r])=>`<details><summary>${p}</summary><p>${r}</p></details>`).join("")}
 function render(){
   if(!CARROS.length){grade.innerHTML='<div class="vazio">Estoque sendo atualizado. Volte em breve.</div>';return}
   const um=pCarro?CARROS.find(c=>c.id===pCarro):null;
-  if(um){grade.innerHTML=cartao(um)+'<div class="vazio"><a href="'+location.pathname+'" style="color:#fff">Ver todos os carros</a></div>';return}
-  grade.innerHTML=CARROS.map(cartao).join("");
+  const lista=um?[um]:CARROS;
+  grade.innerHTML=lista.map(cartao).join("")+(um&&CARROS.length>1?`<div class="vazio"><a href="${location.pathname}">Ver todos os carros</a></div>`:"");
+  document.getElementById("info").innerHTML=faq(lista.every(c=>c.semFinanciamento)?FAQ_SEM_FIN:FAQ_COM_FIN);
+  if(um){const b=document.getElementById("barra");b.classList.add("on");document.getElementById("barraBotao").onclick=()=>chamar(um)}
 }
-grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;atual=CARROS.find(c=>c.id===b.dataset.id);document.getElementById("tituloCarro").textContent=atual.nome;fundo.classList.add("on")});
-document.getElementById("cancelar").onclick=()=>fundo.classList.remove("on");
 function codigo(){const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return "CC-"+s}
-f.addEventListener("submit",e=>{
-  e.preventDefault();
-  if(!WHATSAPP){alert("Número de WhatsApp ainda não configurado.");return}
+let saindo=false;
+function chamar(c){
+  if(saindo)return; saindo=true;
   const p=new URLSearchParams(location.search),cod=codigo();
-  const d={codigo:cod,nome:document.getElementById("nome").value.trim(),carro:atual.nome,pagamento:"",quando:"",
+  const d={codigo:cod,nome:"(direto no WhatsApp)",carro:c.nome,pagamento:"",quando:"",
     utm_source:p.get("utm_source")||"",utm_campaign:p.get("utm_campaign")||"",utm_content:p.get("utm_content")||pCarro||"",enviado_em:new Date().toISOString()};
   /* sendBeacon entrega o registro mesmo quando a página sai para o WhatsApp antes da resposta (celular lento) */
   if(REGISTRO_URL){const corpo=JSON.stringify(d);let foi=false;
     try{foi=!!(navigator.sendBeacon&&navigator.sendBeacon(REGISTRO_URL,corpo))}catch(x){}
     if(!foi){try{fetch(REGISTRO_URL,{method:"POST",mode:"no-cors",keepalive:true,body:corpo})}catch(x){}}}
-  const msg=`Olá! Vi o ${d.carro} no CredCars.\nMeu código: ${cod}\nMeu nome: ${d.nome}`;
-  setTimeout(()=>{location.href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg)},350);
-});
+  const msg=`Olá! Vi o ${c.curto||c.nome} no CredCars e quero ver o carro.\nMeu código: ${cod}`;
+  setTimeout(()=>{location.href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);saindo=false},350);
+}
+grade.addEventListener("click",e=>{const b=e.target.closest(".quero");if(!b)return;chamar(CARROS.find(c=>c.id===b.dataset.id))});
 render();
 </script>
 </body>
