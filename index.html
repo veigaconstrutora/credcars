@@ -25,6 +25,7 @@ header p{margin:0 auto;max-width:460px;color:#e2e2e2;font-size:15px}
 .selos span{background:#2f2f2f;border:1px solid #444;border-radius:20px;padding:4px 10px;font-size:13px}
 button{font:inherit;cursor:pointer;border:0;border-radius:8px}
 .quero{width:100%;padding:14px;background:#d62828;color:#fff;font-weight:700;font-size:17px;margin-top:6px}
+.carro.vendido img{filter:grayscale(1);opacity:.7}
 .vazio{grid-column:1/-1;text-align:center;color:#bdbdbd;padding:20px}
 .vazio a{color:#fff}
 details{background:#222;border:1px solid #333;border-radius:10px;margin:8px 0;padding:12px 14px}
@@ -79,6 +80,7 @@ const CARROS = [
            "carros/c1/04-interior-frente.jpg","carros/c1/05-painel.jpg","carros/c1/06-banco-traseiro.jpg"] },
   { id:"c2", nome:"Chevrolet Celta Spirit 1.0 · 2010 · 2 portas", curto:"Celta 2010",
     detalhe:"210 mil km · Flex · Manual · pneus novos · interno bem cuidado",
+    vendido:true, /* vendido em 11/11/2026 */
     preco:"R$ 21.500", selos:["Abaixo da FIPE","Financia","Aceita troca"],
     pagamento:"Financia e aceita troca · R$ 3.394 abaixo da tabela FIPE (R$ 24.894)",
     /* financia e aceita troca: confirmado pelo dono em 10/11 */
@@ -113,6 +115,8 @@ const pCarro=new URLSearchParams(location.search).get("carro");
 function cartao(c){
   const fotos=(c.fotos||[c.foto]).map((f,i)=>`<img src="${f}" alt="${c.nome}, foto ${i+1}" ${i?'loading="lazy"':""}>`).join("");
   const n=(c.fotos||[]).length;
+  if(c.vendido) return `<div class="carro vendido"><div class="galeria">${fotos.split("<img")[1]?"<img"+fotos.split("<img")[1]:""}</div><div>`+
+    `<h2>${c.nome}</h2><div class="preco">VENDIDO</div><small>Este já encontrou dono. Veja os outros carros disponíveis.</small></div></div>`;
   return `<div class="carro"><div class="galeria">${fotos}</div>${n>1?`<p class="dica">Deslize para o lado: ${n} fotos</p>`:""}<div>`+
     `<h2>${c.nome}</h2><small>${c.detalhe||""}</small><div class="preco">${c.preco}</div>`+
     `${c.pagamento?`<small>${c.pagamento}</small>`:""}`+
@@ -122,11 +126,14 @@ function cartao(c){
 function faq(lista){return '<h2>Perguntas</h2>'+lista.map(([p,r])=>`<details><summary>${p}</summary><p>${r}</p></details>`).join("")}
 function render(){
   if(!CARROS.length){grade.innerHTML='<div class="vazio">Estoque sendo atualizado. Volte em breve.</div>';return}
-  const um=pCarro?CARROS.find(c=>c.id===pCarro):null;
-  const lista=um?[um]:CARROS;
+  const pedido=pCarro?CARROS.find(c=>c.id===pCarro):null;
+  const disponiveis=CARROS.filter(c=>!c.vendido);
+  /* link de carro vendido: mostra o vendido e, abaixo, os disponíveis */
+  const um=pedido&&!pedido.vendido?pedido:null;
+  const lista=um?[um]:(pedido?[pedido,...disponiveis]:[...disponiveis,...CARROS.filter(c=>c.vendido)]);
   grade.innerHTML=lista.map(cartao).join("")+(um&&CARROS.length>1?`<div class="vazio"><a href="${location.pathname}">Ver todos os carros</a></div>`:"");
   const perguntas=um?(um.faq||(um.semFinanciamento?FAQ_SEM_FIN:FAQ_COM_FIN))
-                    :(lista.every(c=>c.semFinanciamento)?FAQ_SEM_FIN:FAQ_GERAL);
+                    :(disponiveis.every(c=>c.semFinanciamento)?FAQ_SEM_FIN:FAQ_GERAL);
   document.getElementById("info").innerHTML=faq(perguntas);
   if(um){const b=document.getElementById("barra");b.classList.add("on");document.getElementById("barraBotao").onclick=()=>chamar(um)}
 }
